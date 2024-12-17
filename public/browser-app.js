@@ -13,16 +13,25 @@ let imageValue;
 //  console.log(file);
 // })
 
+/*
+->Using this event listener, an image would be taken from the client and uploaded to the server
+->The server would then give us back a response using which we can publicly access the image
+*/ 
 imageInputDOM.addEventListener("change", async (e) => {
   const imageFile = e.target.files[0];
+  
   const formData = new FormData();
-  formData.append("image", imageFile);
+  formData.append("uploadedImage", imageFile);
+  // for (let [key, value] of formData.entries()) {
+  //   console.log(key, value);
+  // }
+  
   try {
     const {
       data: {
         image: { src },
       },
-    } = await axios.post(`${url}/uploads`, formData, {
+    } = await axios.post(`${url}/uploadImage`, formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
@@ -39,7 +48,7 @@ fileFormDOM.addEventListener("submit", async (e) => {
   const nameValue = nameInputDOM.value;
   const priceValue = priceInputDOM.value;
   try {
-    const product = { name: nameValue, price: priceValue, image: imageValue };
+    const product = { name: nameValue, price: priceValue, imageUrl: imageValue };
 
     await axios.post(url, product);
     fetchProducts();
@@ -50,14 +59,11 @@ fileFormDOM.addEventListener("submit", async (e) => {
 
 async function fetchProducts() {
   try {
-    const {
-      data: { products },
-    } = await axios.get(url);
-
+    const {data:{allProducts:products}}= await axios.get(url);
     const productsDOM = products
       .map((product) => {
         return `<article class="product">
-<img src="${product.image}" alt="${product.name}" class="img"/>
+<img src="${product.imageUrl}" alt="${product.name}" class="img"/>
 <footer>
 <p>${product.name}</p>
 <span>$${product.price}</span>
@@ -72,3 +78,4 @@ async function fetchProducts() {
 }
 
 fetchProducts();
+
